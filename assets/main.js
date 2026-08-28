@@ -90,10 +90,11 @@
   /* ---------- 行程 ---------- */
   const days = $('#schedule-days');
   CAMP.schedule.forEach((d) => {
-    const card = el('div', 'day-card');
+    const card = el('div', 'day-card' + (d.optional ? ' optional' : ''));
     const head = el('div', 'day-head');
     head.appendChild(el('span', 'day-name', d.day));
     head.appendChild(el('span', 'day-date', d.date));
+    if (d.tag) head.appendChild(el('span', 'day-tag', d.tag));
     card.appendChild(head);
     const ul = el('ul', 'day-items');
     d.items.forEach((it) => {
