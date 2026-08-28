@@ -35,27 +35,11 @@ p { margin: 0; }
 ul, ol { margin: 0; padding: 0; list-style: none; }
 a { color: var(--orange); }
 
-/* ---------- 背景飄浮元素 ---------- */
-.floaters {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  overflow: hidden;
-}
-.floaters span {
-  position: absolute;
-  font-size: 1.6rem;
-  opacity: .13;
-  animation: drift linear infinite;
-}
-@keyframes drift {
-  from { transform: translateY(105vh) rotate(0deg); }
-  to   { transform: translateY(-15vh) rotate(360deg); }
-}
 @media (prefers-reduced-motion: reduce) {
-  .floaters { display: none; }
+  .bats { display: none; }
   html { scroll-behavior: auto; }
+  .stars, .moon, .fog, .hero-title { animation: none; }
+  .btn:hover { transform: none; }
 }
 
 /* ---------- Nav ---------- */
@@ -117,76 +101,202 @@ a { color: var(--orange); }
 .hero {
   position: relative;
   z-index: 1;
-  background:
-    radial-gradient(ellipse 80% 55% at 50% 0%, rgba(255, 140, 43, .22), transparent 70%),
-    radial-gradient(ellipse 70% 50% at 15% 20%, rgba(177, 132, 255, .18), transparent 70%),
-    var(--bg);
+  overflow: hidden;
+  background: linear-gradient(180deg, #0a0714 0%, #1a1030 42%, #2d1638 72%, #3d1c2e 100%);
 }
+
+/* 夜空圖層 */
+.sky { position: absolute; inset: 0; pointer-events: none; }
+
+.stars {
+  position: absolute;
+  inset: 0 0 30% 0;
+  background-image:
+    radial-gradient(1.6px 1.6px at 12% 18%, #fff, transparent),
+    radial-gradient(1.4px 1.4px at 27% 42%, #ffe9c9, transparent),
+    radial-gradient(1.2px 1.2px at 41% 12%, #fff, transparent),
+    radial-gradient(1.8px 1.8px at 58% 32%, #fff, transparent),
+    radial-gradient(1.3px 1.3px at 69% 8%,  #d9c9ff, transparent),
+    radial-gradient(1.5px 1.5px at 82% 46%, #fff, transparent),
+    radial-gradient(1.2px 1.2px at 91% 22%, #ffe9c9, transparent),
+    radial-gradient(1.4px 1.4px at 5% 55%,  #fff, transparent),
+    radial-gradient(1.3px 1.3px at 36% 62%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 75% 66%, #d9c9ff, transparent);
+  opacity: .85;
+  animation: twinkle 5s ease-in-out infinite alternate;
+}
+@keyframes twinkle { from { opacity: .35; } to { opacity: .95; } }
+
+.moon {
+  position: absolute;
+  /* 固定 px 而非 %：hero 在手機上很高，用 % 會把月亮推到標題上面去 */
+  top: 28px;
+  right: 8%;
+  width: clamp(64px, 12vw, 128px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 34% 32%, #fff7e2, #ffd894 55%, #f0b662);
+  box-shadow:
+    0 0 40px 12px rgba(255, 205, 130, .35),
+    0 0 110px 40px rgba(255, 170, 80, .18);
+  animation: moonglow 7s ease-in-out infinite alternate;
+}
+/* 隕石坑 */
+.moon::before, .moon::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(198, 143, 74, .3);
+}
+.moon::before { width: 22%; height: 22%; top: 24%; left: 52%; }
+.moon::after  { width: 15%; height: 15%; top: 58%; left: 30%; box-shadow: 34% -120% 0 -1px rgba(198,143,74,.26); }
+@media (max-width: 560px) {
+  .moon { top: 14px; right: 5%; width: 54px; }
+}
+@keyframes moonglow {
+  from { box-shadow: 0 0 32px 10px rgba(255,205,130,.28), 0 0 90px 32px rgba(255,170,80,.14); }
+  to   { box-shadow: 0 0 52px 16px rgba(255,205,130,.42), 0 0 130px 48px rgba(255,170,80,.22); }
+}
+
+/* 蝙蝠 */
+.bats { position: absolute; inset: 0; }
+/* 夜空是深色的，蝙蝠用「比天空亮一點」的剪影才看得見 */
+.bat {
+  position: absolute;
+  width: 26px;
+  color: #c3b2e0;
+  opacity: .3;
+  animation: fly linear infinite, flap .32s ease-in-out infinite alternate;
+}
+.bat svg { width: 100%; height: auto; display: block; }
+@keyframes fly {
+  from { transform: translate(-12vw, 0); }
+  to   { transform: translate(115vw, -40px); }
+}
+@keyframes flap { from { scale: 1 1; } to { scale: .72 1.08; } }
+
+/* 地面霧氣 */
+.fog {
+  position: absolute;
+  left: -10%;
+  right: -10%;
+  bottom: 0;
+  height: 190px;
+  background:
+    radial-gradient(ellipse 55% 100% at 20% 100%, rgba(177,132,255,.20), transparent 70%),
+    radial-gradient(ellipse 60% 100% at 62% 100%, rgba(255,140,43,.16), transparent 70%),
+    radial-gradient(ellipse 45% 100% at 90% 100%, rgba(177,132,255,.16), transparent 70%);
+  filter: blur(6px);
+  animation: fogdrift 16s ease-in-out infinite alternate;
+}
+@keyframes fogdrift { from { transform: translateX(-3%); } to { transform: translateX(3%); } }
+
+/* 樹林剪影 */
+.treeline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  width: 100%;
+  height: clamp(84px, 13vw, 150px);
+  fill: #0b0712;
+}
+.treeline .tent { fill: none; stroke: #0b0712; stroke-width: 9; stroke-linejoin: round; }
+
 .hero-inner {
+  position: relative;
+  z-index: 2;
   max-width: var(--wrap);
   margin: 0 auto;
-  padding: 56px 20px 64px;
+  padding: 64px 20px clamp(120px, 17vw, 190px);
   text-align: center;
 }
+
 .hero-kicker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
   color: var(--orange);
   font-weight: 700;
-  letter-spacing: .12em;
-  font-size: .9rem;
-  margin-bottom: 10px;
+  letter-spacing: .1em;
+  font-size: .88rem;
+  margin-bottom: 14px;
+  text-shadow: 0 0 18px rgba(255, 140, 43, .5);
 }
+.kicker-line {
+  height: 1px;
+  width: clamp(18px, 8vw, 64px);
+  background: linear-gradient(90deg, transparent, var(--orange));
+}
+.kicker-line:last-child { background: linear-gradient(90deg, var(--orange), transparent); }
+
 .hero-title {
-  font-size: clamp(2.1rem, 8vw, 3.8rem);
+  font-size: clamp(2.3rem, 9vw, 4.4rem);
   font-weight: 900;
-  background: linear-gradient(100deg, #ffd08a, var(--orange) 45%, var(--purple));
+  letter-spacing: .01em;
+  background: linear-gradient(100deg, #fff0cf, #ffb347 30%, var(--orange) 55%, var(--purple));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  filter: drop-shadow(0 0 26px rgba(255, 140, 43, .38));
+  animation: flicker 6s linear infinite;
 }
-.hero-sub { color: var(--muted); margin-top: 12px; font-size: 1.05rem; }
+@keyframes flicker {
+  0%, 42%, 46%, 57%, 100% { opacity: 1; }
+  44%, 55% { opacity: .82; }
+  45%      { opacity: .95; }
+}
+.hero-sub { color: #d9cfe8; margin-top: 14px; font-size: 1.05rem; }
 
-/* countdown */
+/* countdown — 固定四欄，不換行 */
 .countdown {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin: 32px 0 8px;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(6px, 2vw, 10px);
+  max-width: 400px;
+  margin: 32px auto 8px;
 }
 .cd-unit {
-  min-width: 78px;
-  padding: 12px 8px;
-  background: var(--card);
-  border: 1px solid var(--line);
+  position: relative;
+  padding: 14px clamp(4px, 2vw, 10px);
+  background: rgba(36, 28, 61, .55);
+  border: 1px solid rgba(255, 140, 43, .3);
   border-radius: var(--radius);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 0 30px rgba(255, 140, 43, .12), inset 0 1px 0 rgba(255, 255, 255, .06);
 }
 .cd-num {
   display: block;
-  font-size: clamp(1.5rem, 6vw, 2.2rem);
+  font-size: clamp(1.7rem, 6.5vw, 2.4rem);
   font-weight: 900;
-  color: var(--orange);
+  color: #ffb45f;
   font-variant-numeric: tabular-nums;
   line-height: 1.15;
+  text-shadow: 0 0 20px rgba(255, 140, 43, .55);
 }
 .cd-label { display: block; font-size: .78rem; color: var(--muted); }
-.cd-caption { color: var(--muted); font-size: .9rem; }
+.cd-caption { color: #c6b9da; font-size: .9rem; }
 
 /* facts */
 .hero-facts {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
   gap: 10px;
   margin-top: 34px;
   text-align: left;
 }
 .fact {
-  background: var(--card);
-  border: 1px solid var(--line);
+  background: rgba(36, 28, 61, .5);
+  border: 1px solid rgba(255, 255, 255, .09);
   border-radius: 12px;
-  padding: 12px 16px;
+  padding: 13px 17px;
+  backdrop-filter: blur(8px);
 }
-.fact-k { display: block; font-size: .78rem; color: var(--muted); letter-spacing: .08em; }
-.fact-v { font-weight: 700; }
+.fact-k { display: block; font-size: .74rem; color: var(--muted); letter-spacing: .1em; }
+.fact-v { display: block; font-weight: 700; font-size: 1.02rem; margin-top: 1px; }
+.fact-x { display: block; font-size: .8rem; color: var(--muted); margin-top: 2px; }
+.nb { white-space: nowrap; }
 
 .hero-cta { margin-top: 26px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
 
@@ -201,9 +311,19 @@ a { color: var(--orange); }
   font-weight: 700;
   cursor: pointer;
 }
-.btn.primary { background: linear-gradient(100deg, var(--orange), var(--orange-d)); color: #2a1400; }
-.btn.ghost { background: transparent; color: var(--muted); border-color: var(--line); }
-.btn:hover { filter: brightness(1.08); }
+.btn.primary {
+  background: linear-gradient(100deg, var(--orange), var(--orange-d));
+  color: #2a1400;
+  box-shadow: 0 6px 26px rgba(255, 140, 43, .35);
+}
+.btn.ghost {
+  background: rgba(36, 28, 61, .5);
+  color: var(--text);
+  border-color: rgba(255, 255, 255, .16);
+  backdrop-filter: blur(8px);
+}
+.btn:hover { filter: brightness(1.08); transform: translateY(-1px); }
+.btn { transition: transform .15s ease, filter .15s ease; }
 
 /* ---------- Sections ---------- */
 .section {
@@ -343,6 +463,43 @@ a { color: var(--orange); }
 }
 .treat-desc { font-size: 1.05rem; font-weight: 500; }
 
+/* ---------- 禮物備量 ---------- */
+.gift-card {
+  margin-top: 14px;
+  padding: 22px 24px;
+  border-radius: var(--radius);
+  border: 1px solid var(--orange);
+  background: linear-gradient(160deg, rgba(255, 140, 43, .12), var(--card) 60%);
+}
+.gift-title { font-size: 1rem; font-weight: 900; }
+.gift-big {
+  font-size: clamp(2.4rem, 10vw, 3.4rem);
+  font-weight: 900;
+  color: var(--orange);
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  margin-top: 4px;
+}
+.gift-unit { font-size: 1.1rem; color: var(--muted); font-weight: 700; }
+.gift-formula { color: var(--muted); font-size: .9rem; margin-top: 6px; }
+.gift-gap {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px dashed var(--line);
+}
+.gift-gap-title { font-weight: 700; color: var(--red); font-size: .95rem; }
+.gift-gap-note { color: var(--muted); font-size: .85rem; margin-top: 10px; }
+.site-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.site-chips li {
+  background: rgba(255, 107, 129, .12);
+  border: 1px solid rgba(255, 107, 129, .3);
+  color: #ffc4cd;
+  border-radius: 8px;
+  padding: 2px 10px;
+  font-size: .85rem;
+  font-weight: 700;
+}
+
 /* ---------- Steps ---------- */
 .steps {
   display: grid;
@@ -414,7 +571,16 @@ a { color: var(--orange); }
 }
 
 /* ---------- 營位表 ---------- */
-.search { display: block; margin-top: 16px; }
+.roster-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 18px;
+  margin-top: 16px;
+}
+.tool-hint { color: var(--muted); font-size: .83rem; }
+
+.search { display: block; }
 .search input {
   width: 100%;
   max-width: 380px;
@@ -468,8 +634,40 @@ table.roster th, table.roster td {
   border-bottom: 1px solid var(--line);
 }
 table.roster th { color: var(--muted); font-size: .8rem; font-weight: 700; letter-spacing: .06em; }
+table.roster thead th { padding: 0; }
+.th-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  width: 100%;
+  padding: 11px 14px;
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  font-weight: 700;
+  letter-spacing: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+th.num .th-btn { justify-content: flex-end; }
+.th-btn:hover { color: var(--text); }
+.th-btn:focus-visible { outline: 2px solid var(--orange); outline-offset: -2px; }
+.arrow::before { content: "⇅"; opacity: .35; font-size: .9em; }
+th[aria-sort="ascending"]  .arrow::before { content: "▲"; opacity: 1; font-size: .7em; }
+th[aria-sort="descending"] .arrow::before { content: "▼"; opacity: 1; font-size: .7em; }
+th[aria-sort="ascending"] .th-btn,
+th[aria-sort="descending"] .th-btn { color: var(--orange); }
 table.roster td.num, table.roster th.num { text-align: right; font-variant-numeric: tabular-nums; }
 table.roster tbody tr:hover { background: var(--card); }
+table.roster tfoot th, table.roster tfoot td {
+  border-top: 2px solid var(--orange);
+  border-bottom: 0;
+  padding-top: 13px;
+  font-weight: 900;
+  color: var(--orange);
+}
+table.roster tfoot th { text-align: left; font-size: .9rem; letter-spacing: 0; }
 .site-badge { font-weight: 700; color: var(--orange); }
 .type-cabin { color: var(--purple); }
 .type-tent { color: var(--muted); }

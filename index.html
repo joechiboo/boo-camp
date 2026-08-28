@@ -19,8 +19,6 @@
 </head>
 <body>
 
-<div class="floaters" aria-hidden="true"></div>
-
 <nav class="nav">
   <a class="nav-brand" href="#top">🎃 <span data-bind="year"></span> 團露</a>
   <button class="nav-toggle" aria-expanded="false" aria-controls="nav-links">選單</button>
@@ -38,8 +36,26 @@
 </nav>
 
 <header class="hero">
+  <div class="sky" aria-hidden="true">
+    <div class="stars"></div>
+    <div class="moon"></div>
+    <div class="bats" id="bats"></div>
+    <div class="fog"></div>
+    <svg class="treeline" viewBox="0 0 1200 160" preserveAspectRatio="none" role="presentation">
+      <path d="M0 160 L0 118 L38 74 L60 96 L84 40 L110 90 L130 66 L152 108 L180 120
+               L205 78 L228 104 L250 52 L276 100 L300 84 L322 116 L360 124
+               L392 88 L414 110 L436 62 L462 104 L486 92 L508 120 L548 126
+               L580 96 L604 118 L626 70 L652 112 L676 98 L700 124 L742 128
+               L774 92 L798 116 L820 60 L846 106 L870 90 L892 120 L934 126
+               L966 84 L990 110 L1012 56 L1038 102 L1062 86 L1084 118 L1124 122
+               L1152 80 L1176 106 L1200 72 L1200 160 Z"/>
+      <path class="tent" d="M470 160 L516 96 L562 160 Z M516 96 L516 160"/>
+      <path class="tent" d="M690 160 L726 110 L762 160 Z M726 110 L726 160"/>
+    </svg>
+  </div>
+
   <div class="hero-inner" id="top">
-    <p class="hero-kicker" data-bind="dateLabel"></p>
+    <p class="hero-kicker"><span class="kicker-line"></span><span data-bind="dateLabel"></span><span class="kicker-line"></span></p>
     <h1 class="hero-title" data-bind="title"></h1>
     <p class="hero-sub" data-bind="subtitle"></p>
 
@@ -52,10 +68,21 @@
     <p class="cd-caption" id="cd-caption"></p>
 
     <div class="hero-facts">
-      <div class="fact"><span class="fact-k">日期</span><span class="fact-v" data-bind="dateLabel"></span></div>
-      <div class="fact"><span class="fact-k">夜數</span><span class="fact-v"><span data-bind="nightsLabel"></span> · <span data-bind="holidayNote"></span></span></div>
-      <div class="fact"><span class="fact-k">營區</span><span class="fact-v" data-bind="campName"></span></div>
-      <div class="fact"><span class="fact-k">主辦</span><span class="fact-v" id="hosts"></span></div>
+      <div class="fact">
+        <span class="fact-k">日期</span>
+        <span class="fact-v"><span class="nb" data-bind="dateStart"></span> ～ <span class="nb" data-bind="dateEnd"></span></span>
+        <span class="fact-x"><span data-bind="nightsLabel"></span> · <span data-bind="holidayNote"></span></span>
+      </div>
+      <div class="fact">
+        <span class="fact-k">營區</span>
+        <span class="fact-v" data-bind="campName"></span>
+        <span class="fact-x" data-bind="campAddress"></span>
+      </div>
+      <div class="fact">
+        <span class="fact-k">主辦</span>
+        <span class="fact-v" id="hosts"></span>
+        <span class="fact-x">有問題在群組 tag 我們</span>
+      </div>
     </div>
 
     <div class="hero-cta" id="hero-cta"></div>
@@ -87,6 +114,17 @@
       <p class="treat-desc" id="treat-desc"></p>
       <ul class="bullets" id="treat-points"></ul>
     </div>
+
+    <div class="gift-card" id="gift-card" hidden>
+      <h3 class="gift-title">🎁 禮物備量估算</h3>
+      <p class="gift-big"><span id="gift-total">–</span> <span class="gift-unit">份</span></p>
+      <p class="gift-formula" id="gift-formula"></p>
+      <div class="gift-gap" id="gift-gap" hidden>
+        <p class="gift-gap-title" id="gift-gap-title"></p>
+        <ul class="site-chips" id="gift-gap-sites"></ul>
+        <p class="gift-gap-note">人數補齊後這個數字會準很多，主辦可以照這份名單去追。</p>
+      </div>
+    </div>
   </section>
 
   <section class="section" id="steps">
@@ -109,16 +147,34 @@
   <section class="section" id="roster" hidden>
     <h2 class="sec-title">⛺ 營位表</h2>
     <div class="roster-summary" id="roster-summary"></div>
-    <label class="search">
-      <span class="sr-only">搜尋營位或聯絡人</span>
-      <input type="search" id="roster-search" placeholder="搜尋營位或名字，例如 C4、Lydia、菊屋">
-    </label>
+    <div class="roster-tools">
+      <label class="search">
+        <span class="sr-only">搜尋營位或聯絡人</span>
+        <input type="search" id="roster-search" placeholder="搜尋營位或名字，例如 C4、Lydia、菊屋">
+      </label>
+      <p class="tool-hint">點欄位標題可排序，再點一次反向，第三次回復原順序。</p>
+    </div>
     <div class="table-wrap">
       <table class="roster">
         <thead>
-          <tr><th>營位</th><th>類型</th><th>聯絡人</th><th class="num">大人</th><th class="num">小孩</th><th class="num">嫩嬰</th></tr>
+          <tr>
+            <th data-key="site"    aria-sort="none"><button type="button" class="th-btn">營位<span class="arrow"></span></button></th>
+            <th data-key="type"    aria-sort="none"><button type="button" class="th-btn">類型<span class="arrow"></span></button></th>
+            <th data-key="contact" aria-sort="none"><button type="button" class="th-btn">聯絡人<span class="arrow"></span></button></th>
+            <th data-key="adults"  aria-sort="none" class="num"><button type="button" class="th-btn">大人<span class="arrow"></span></button></th>
+            <th data-key="kids"    aria-sort="none" class="num"><button type="button" class="th-btn">小孩<span class="arrow"></span></button></th>
+            <th data-key="babies"  aria-sort="none" class="num"><button type="button" class="th-btn">嫩嬰<span class="arrow"></span></button></th>
+          </tr>
         </thead>
         <tbody id="roster-body"></tbody>
+        <tfoot>
+          <tr>
+            <th colspan="3" id="roster-total-label">合計</th>
+            <td class="num" id="total-adults">0</td>
+            <td class="num" id="total-kids">0</td>
+            <td class="num" id="total-babies">0</td>
+          </tr>
+        </tfoot>
       </table>
     </div>
     <p class="empty" id="roster-empty" hidden>找不到符合的營位。</p>

@@ -14,13 +14,14 @@ const CAMP = {
   startISO: '2026-10-24T14:00:00+08:00',
 
   dateLabel: '2026/10/24（六）～ 10/26（一）',
+  dateStart: '10/24（六）',   // 資訊卡用，避免長日期在窄卡片裡斷行
+  dateEnd: '10/26（一）',
   nightsLabel: '共兩夜',
   holidayNote: '光復節連假',
 
-  // TODO 主辦確認：營區全名、地址、Google 地圖連結
-  campName: '（營區名稱待補）',
-  campAddress: '（營區地址待補）',
-  campMapUrl: '', // 例：'https://maps.app.goo.gl/xxxxx'，留空則不顯示地圖按鈕
+  campName: '遊橘露營區',
+  campAddress: '312 新竹縣橫山鄉福興村 112-6 號',
+  campMapUrl: 'https://www.google.com/maps/search/?api=1&query=%E9%81%8A%E6%A9%98%E9%9C%B2%E7%87%9F%E5%8D%80',
 
   hosts: [
     { name: '江嘉芸', role: '主辦' },
@@ -110,6 +111,16 @@ const CAMP = {
       ],
     },
   ],
+
+  /* ---------- 討糖禮物備量估算 ----------
+     數字會從下面的 roster 自動算，這裡只調參數。
+     建議備量 = 已確認小孩數 ＋（未確認營位數 × perUnknownSite）＋ extraBuffer */
+  giftPlan: {
+    show: true,
+    perUnknownSite: 2,    // 每個「未填人數」的營位先預留幾份
+    extraBuffer: 5,       // 額外備品：弄丟、臨時加入、印壞
+    includeBabies: false, // 嫩嬰是否也算一份（3D 列印小零件對 3 歲以下有窒息風險）
+  },
 
   /* ---------- 討糖活動 ---------- */
   trickOrTreat: {

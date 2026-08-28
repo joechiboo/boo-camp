@@ -2,13 +2,15 @@
 
 給團露成員看的活動資訊網站。主辦：江嘉芸、Lydia。
 
-**網址**：https://joechiboo.github.io/boo-camp/
+**網址**：<https://joechiboo.github.io/boo-camp/>
+
+營區：遊橘露營區（312 新竹縣橫山鄉福興村 112-6 號）· 2026/10/24（六）～ 10/26（一），兩夜
 
 ## 要改內容的話
 
 九成的內容都在 [`assets/data.js`](assets/data.js)，改那一個檔就好，不用碰 HTML。
 
-```
+```text
 assets/data.js       ← 所有文字內容：日期、行程、餐食、營位表、Q&A、打包清單
 assets/camp-map.jpg  ← 營位分佈圖（換圖直接覆蓋同名檔案即可）
 assets/style.css     ← 樣式
@@ -36,6 +38,7 @@ git push
 | 行程時間 | `schedule` |
 | 餐車狀態 | `meals` — `status` 用 `confirmed` 或 `cancelled` |
 | 營位人數 | `roster` — 不確定的填 `null`，畫面會顯示「—」 |
+| 討糖禮物要備幾份 | `giftPlan` — 調 `perUnknownSite` 和 `extraBuffer`，總數自動重算 |
 | 暫時隱藏營位表 | `showRoster: false` |
 | 暫時隱藏營位圖 | `map.show: false` |
 

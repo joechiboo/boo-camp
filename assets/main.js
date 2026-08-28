@@ -26,11 +26,26 @@
   const cta = $('#hero-cta');
   cta.appendChild(Object.assign(el('a', 'btn primary', '看目前進度'), { href: '#status' }));
   if (CAMP.campMapUrl) {
-    const a = el('a', 'btn ghost', '📍 營區地圖');
+    const a = el('a', 'btn ghost', '📍 ' + CAMP.campName + ' 地圖');
     a.href = CAMP.campMapUrl;
     a.target = '_blank';
     a.rel = 'noopener';
     cta.appendChild(a);
+  }
+
+  /* ---------- Hero 蝙蝠 ---------- */
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const BAT = '<svg viewBox="0 0 100 40" fill="currentColor" aria-hidden="true"><path d="M50 26 C46 30 42 30 38 26 C32 22 24 22 18 26 C16 22 12 19 4 19 C8 15 13 14 17 17 C20 14 20 10 16 4 C28 2 38 6 44 14 L46 10 L45 3 L49 7 L51 7 L55 3 L54 10 L56 14 C62 6 72 2 84 4 C80 10 80 14 83 17 C87 14 92 15 96 19 C88 19 84 22 82 26 C76 22 68 22 62 26 C58 30 54 30 50 26 Z"/></svg>';
+    const bats = $('#bats');
+    [[9, 26, 4], [22, 34, 0], [16, 42, 9]].forEach(([top, dur, delay], i) => {
+      const b = el('div', 'bat');
+      b.innerHTML = BAT;
+      b.style.top = top + '%';
+      b.style.width = (20 + i * 7) + 'px';
+      b.style.animationDuration = dur + 's, ' + (0.28 + i * 0.06) + 's';
+      b.style.animationDelay = '-' + delay + 's, 0s';
+      bats.appendChild(b);
+    });
   }
 
   /* ---------- 倒數計時 ---------- */
@@ -111,6 +126,41 @@
   const tp = $('#treat-points');
   CAMP.trickOrTreat.points.forEach((p) => tp.appendChild(el('li', null, p)));
 
+  /* ---------- 禮物備量估算 ---------- */
+  // 「未確認」＝ 大人或小孩任一欄沒填，人數無法拆解
+  const isUnconfirmed = (r) => r.adults == null || r.kids == null;
+  const unconfirmed = CAMP.roster.filter(isUnconfirmed);
+  const knownKids = CAMP.roster.reduce((t, r) => t + (r.kids || 0), 0);
+  const knownBabies = CAMP.roster.reduce((t, r) => t + (r.babies || 0), 0);
+
+  const gp = CAMP.giftPlan;
+  if (gp && gp.show && CAMP.roster.length) {
+    const babyPart = gp.includeBabies ? knownBabies : 0;
+    const gapPart = unconfirmed.length * gp.perUnknownSite;
+    const total = knownKids + babyPart + gapPart + gp.extraBuffer;
+
+    $('#gift-card').hidden = false;
+    $('#gift-total').textContent = total;
+
+    const parts = ['已確認小孩 ' + knownKids];
+    if (gp.includeBabies) parts.push('嫩嬰 ' + knownBabies);
+    if (gapPart) parts.push('未確認營位 ' + unconfirmed.length + ' × ' + gp.perUnknownSite + ' = ' + gapPart);
+    parts.push('備品 ' + gp.extraBuffer);
+    $('#gift-formula').textContent = parts.join('　＋　') + '　＝　' + total + ' 份';
+
+    if (unconfirmed.length) {
+      $('#gift-gap').hidden = false;
+      $('#gift-gap-title').textContent = '⚠️ 還有 ' + unconfirmed.length + ' 個營位沒填人數：';
+      const gapList = $('#gift-gap-sites');
+      unconfirmed.forEach((r) => gapList.appendChild(el('li', null, r.site + '　' + r.contact)));
+    }
+
+    if (!gp.includeBabies && knownBabies) {
+      tp.appendChild(el('li', null,
+        '嫩嬰 ' + knownBabies + ' 位未計入備量 — 3 歲以下請避開有小零件的禮物（窒息風險）。'));
+    }
+  }
+
   /* ---------- 報名步驟 ---------- */
   const steps = $('#steps-list');
   CAMP.steps.forEach((s) => {
@@ -149,9 +199,8 @@
     $('#roster').hidden = false;
     $('#roster-note').textContent = CAMP.rosterNote;
 
-    const num = (v) => (v == null ? 0 : v);
-    const sum = (key) => CAMP.roster.reduce((t, r) => t + num(r[key]), 0);
-    const unknown = CAMP.roster.filter((r) => r.adults == null || r.kids == null).length;
+    const sum = (key) => CAMP.roster.reduce((t, r) => t + (r[key] || 0), 0);
+    const unknown = unconfirmed.length;
 
     const summary = $('#roster-summary');
     const chips = [
@@ -171,8 +220,9 @@
     }
 
     const tbody = $('#roster-body');
-    CAMP.roster.forEach((r) => {
+    CAMP.roster.forEach((r, idx) => {
       const tr = el('tr', r.host ? 'is-host' : null);
+      tr.dataset.idx = idx;
       const tdSite = el('td');
       tdSite.appendChild(el('span', 'site-badge', r.site));
       tr.appendChild(tdSite);
@@ -194,18 +244,87 @@
       tbody.appendChild(tr);
     });
 
+    // 合計列：只加總「畫面上看得到」的列，所以搜尋 C 就會得到 C 區小計
+    const totalLabel = $('#roster-total-label');
+    const totalCells = { adults: $('#total-adults'), kids: $('#total-kids'), babies: $('#total-babies') };
+
+    function refreshTotals() {
+      const rows = [...tbody.querySelectorAll('tr')].filter((tr) => !tr.hidden);
+      let gaps = 0;
+      const t = { adults: 0, kids: 0, babies: 0 };
+      rows.forEach((tr) => {
+        const r = CAMP.roster[Number(tr.dataset.idx)];
+        t.adults += r.adults || 0;
+        t.kids += r.kids || 0;
+        t.babies += r.babies || 0;
+        if (isUnconfirmed(r)) gaps++;
+      });
+      Object.keys(totalCells).forEach((k) => { totalCells[k].textContent = t[k]; });
+      const all = rows.length === CAMP.roster.length;
+      totalLabel.textContent = '合計　' + (all ? '' : '（篩選後）') + rows.length + ' 個營位'
+        + (gaps ? '　·　其中 ' + gaps + ' 個未填人數' : '');
+      return rows.length;
+    }
+
+    /* 排序：點標題 → 升冪 → 降冪 → 回復原順序 */
+    const collator = new Intl.Collator('zh-Hant', { numeric: true, sensitivity: 'base' });
+    const NUMERIC = new Set(['adults', 'kids', 'babies']);
+    const TYPE_ORDER = { tent: 0, cabin: 1 };
+    let sortKey = null;
+    let sortDir = 1;
+
+    function compare(key, dir, ra, rb) {
+      const a = CAMP.roster[ra.dataset.idx];
+      const b = CAMP.roster[rb.dataset.idx];
+      const tie = collator.compare(a.site, b.site);
+      if (NUMERIC.has(key)) {
+        // 未填的一律沉底，不隨升降冪翻上來
+        if (a[key] == null && b[key] == null) return tie;
+        if (a[key] == null) return 1;
+        if (b[key] == null) return -1;
+        return (a[key] - b[key]) * dir || tie;
+      }
+      if (key === 'type') return (TYPE_ORDER[a.type] - TYPE_ORDER[b.type]) * dir || tie;
+      // 依營位排序時，帳篷區 A1→E6 先，小木屋殿後（跟看地圖的順序一致）
+      if (key === 'site') return ((TYPE_ORDER[a.type] - TYPE_ORDER[b.type]) || tie) * dir;
+      return collator.compare(a[key], b[key]) * dir || tie;
+    }
+
+    function applySort() {
+      const rows = [...tbody.querySelectorAll('tr')];
+      rows.sort(sortKey
+        ? (ra, rb) => compare(sortKey, sortDir, ra, rb)
+        : (ra, rb) => ra.dataset.idx - rb.dataset.idx);
+      const frag = document.createDocumentFragment();
+      rows.forEach((r) => frag.appendChild(r));
+      tbody.appendChild(frag);
+
+      document.querySelectorAll('table.roster thead th').forEach((th) => {
+        const on = th.dataset.key === sortKey;
+        th.setAttribute('aria-sort', on ? (sortDir === 1 ? 'ascending' : 'descending') : 'none');
+      });
+    }
+
+    document.querySelectorAll('table.roster thead th').forEach((th) => {
+      th.querySelector('.th-btn').addEventListener('click', () => {
+        const key = th.dataset.key;
+        if (sortKey !== key) { sortKey = key; sortDir = 1; }
+        else if (sortDir === 1) { sortDir = -1; }
+        else { sortKey = null; sortDir = 1; }
+        applySort();
+      });
+    });
+
     const search = $('#roster-search');
     const empty = $('#roster-empty');
     search.addEventListener('input', () => {
       const q = search.value.trim().toLowerCase();
-      let shown = 0;
       tbody.querySelectorAll('tr').forEach((tr) => {
-        const hit = !q || tr.dataset.search.includes(q);
-        tr.hidden = !hit;
-        if (hit) shown++;
+        tr.hidden = !!q && !tr.dataset.search.includes(q);
       });
-      empty.hidden = shown > 0;
+      empty.hidden = refreshTotals() > 0;
     });
+    refreshTotals();
   }
 
   /* ---------- 打包清單（勾選存在 localStorage） ---------- */
@@ -264,16 +383,4 @@
     }
   });
 
-  /* ---------- 背景飄浮小圖 ---------- */
-  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    const icons = ['🎃', '👻', '🦇', '🕸️', '🍬', '🕷️', '💀'];
-    const floaters = document.querySelector('.floaters');
-    for (let i = 0; i < 14; i++) {
-      const s = el('span', null, icons[i % icons.length]);
-      s.style.left = (i * 7 + 3) + '%';
-      s.style.animationDuration = (18 + (i % 5) * 6) + 's';
-      s.style.animationDelay = '-' + i * 3 + 's';
-      floaters.appendChild(s);
-    }
-  }
 })();
