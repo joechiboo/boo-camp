@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2026 萬聖節團露 🎃</title>
+<meta name="description" content="2026 萬聖節團露 — 10/24～10/26 兩夜。活動資訊、行程、Buffet 登記、討糖活動與打包清單。">
+<meta property="og:title" content="2026 萬聖節團露 🎃">
+<meta property="og:description" content="10/24～10/26 兩夜。一起過一個開心不用煮的萬聖節 👻">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#14101f">
+<!-- 頁面含團員姓名與營位，不讓搜尋引擎收錄；有連結的人仍可正常瀏覽 -->
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎃</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<div class="floaters" aria-hidden="true"></div>
+
+<nav class="nav">
+  <a class="nav-brand" href="#top">🎃 <span data-bind="year"></span> 團露</a>
+  <button class="nav-toggle" aria-expanded="false" aria-controls="nav-links">選單</button>
+  <div class="nav-links" id="nav-links">
+    <a href="#status">進度</a>
+    <a href="#schedule">行程</a>
+    <a href="#meals">餐食</a>
+    <a href="#treat">討糖</a>
+    <a href="#steps">報名繳費</a>
+    <a href="#map">營位圖</a>
+    <a href="#roster">營位表</a>
+    <a href="#packing">打包</a>
+    <a href="#faq">Q&amp;A</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-inner" id="top">
+    <p class="hero-kicker" data-bind="dateLabel"></p>
+    <h1 class="hero-title" data-bind="title"></h1>
+    <p class="hero-sub" data-bind="subtitle"></p>
+
+    <div class="countdown" id="countdown" aria-live="polite">
+      <div class="cd-unit"><span class="cd-num" data-cd="days">–</span><span class="cd-label">天</span></div>
+      <div class="cd-unit"><span class="cd-num" data-cd="hours">–</span><span class="cd-label">時</span></div>
+      <div class="cd-unit"><span class="cd-num" data-cd="mins">–</span><span class="cd-label">分</span></div>
+      <div class="cd-unit"><span class="cd-num" data-cd="secs">–</span><span class="cd-label">秒</span></div>
+    </div>
+    <p class="cd-caption" id="cd-caption"></p>
+
+    <div class="hero-facts">
+      <div class="fact"><span class="fact-k">日期</span><span class="fact-v" data-bind="dateLabel"></span></div>
+      <div class="fact"><span class="fact-k">夜數</span><span class="fact-v"><span data-bind="nightsLabel"></span> · <span data-bind="holidayNote"></span></span></div>
+      <div class="fact"><span class="fact-k">營區</span><span class="fact-v" data-bind="campName"></span></div>
+      <div class="fact"><span class="fact-k">主辦</span><span class="fact-v" id="hosts"></span></div>
+    </div>
+
+    <div class="hero-cta" id="hero-cta"></div>
+  </div>
+</header>
+
+<main>
+
+  <section class="section" id="status">
+    <h2 class="sec-title">📌 目前進度</h2>
+    <p class="sec-lead">看這一區就知道現在該做什麼。</p>
+    <ol class="status-list" id="status-list"></ol>
+  </section>
+
+  <section class="section alt" id="schedule">
+    <h2 class="sec-title">🗓️ 行程</h2>
+    <div class="days" id="schedule-days"></div>
+    <p class="note" id="schedule-note"></p>
+  </section>
+
+  <section class="section" id="meals">
+    <h2 class="sec-title">🍱 兩夜餐食</h2>
+    <div class="meals" id="meals-list"></div>
+  </section>
+
+  <section class="section alt" id="treat">
+    <h2 class="sec-title">🍬 討糖活動</h2>
+    <div class="treat-card">
+      <p class="treat-desc" id="treat-desc"></p>
+      <ul class="bullets" id="treat-points"></ul>
+    </div>
+  </section>
+
+  <section class="section" id="steps">
+    <h2 class="sec-title">✅ 報名與繳費</h2>
+    <div class="steps" id="steps-list"></div>
+    <p class="warn" id="payment-note"></p>
+  </section>
+
+  <section class="section alt" id="map" hidden>
+    <h2 class="sec-title">🗺️ 營位分佈圖</h2>
+    <figure class="map-figure">
+      <button class="map-btn" id="map-open" type="button">
+        <img id="map-img" alt="" loading="lazy" decoding="async">
+      </button>
+      <figcaption class="note" id="map-caption"></figcaption>
+    </figure>
+    <ul class="facilities" id="facilities"></ul>
+  </section>
+
+  <section class="section" id="roster" hidden>
+    <h2 class="sec-title">⛺ 營位表</h2>
+    <div class="roster-summary" id="roster-summary"></div>
+    <label class="search">
+      <span class="sr-only">搜尋營位或聯絡人</span>
+      <input type="search" id="roster-search" placeholder="搜尋營位或名字，例如 C4、Lydia、菊屋">
+    </label>
+    <div class="table-wrap">
+      <table class="roster">
+        <thead>
+          <tr><th>營位</th><th>類型</th><th>聯絡人</th><th class="num">大人</th><th class="num">小孩</th><th class="num">嫩嬰</th></tr>
+        </thead>
+        <tbody id="roster-body"></tbody>
+      </table>
+    </div>
+    <p class="empty" id="roster-empty" hidden>找不到符合的營位。</p>
+    <p class="note" id="roster-note"></p>
+  </section>
+
+  <section class="section alt" id="packing">
+    <h2 class="sec-title">🎒 打包清單</h2>
+    <p class="sec-lead">點一下項目可以打勾，紀錄存在這台裝置的瀏覽器裡。</p>
+    <div class="packing" id="packing-list"></div>
+    <button class="btn ghost" id="packing-reset" type="button">清除所有勾選</button>
+  </section>
+
+  <section class="section" id="faq">
+    <h2 class="sec-title">❓ 常見問題</h2>
+    <div class="faq" id="faq-list"></div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <p class="foot-hosts" id="foot-hosts"></p>
+  <p class="foot-note" id="host-note"></p>
+  <p class="foot-small">本頁僅供團露成員參考，實際資訊以 LINE 群組公告為準。</p>
+</footer>
+
+<dialog class="lightbox" id="lightbox">
+  <button class="lightbox-close" id="lightbox-close" type="button" aria-label="關閉">✕</button>
+  <img id="lightbox-img" alt="">
+</dialog>
+
+<script src="assets/data.js"></script>
+<script src="assets/main.js"></script>
+</body>
+</html>
