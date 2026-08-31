@@ -535,6 +535,152 @@ a { color: var(--orange); }
 .step-title { font-size: 1.1rem; font-weight: 700; margin-top: 4px; }
 .step-desc { color: var(--muted); font-size: .93rem; margin-top: 8px; }
 
+/* ---------- 自助餐收費 ---------- */
+.fee-top {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+  margin-top: 24px;
+}
+.fee-rules, .fee-howto {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+.fee-h { font-size: .95rem; font-weight: 900; color: var(--orange); margin-bottom: 10px; }
+.rule-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 0;
+  border-top: 1px solid var(--line);
+  font-size: .93rem;
+}
+.rule-list li:first-child { border-top: 0; }
+.rule-list b { color: var(--orange); font-variant-numeric: tabular-nums; }
+.howto { counter-reset: step; }
+.howto li {
+  counter-increment: step;
+  position: relative;
+  padding-left: 26px;
+  margin-top: 7px;
+  color: var(--muted);
+  font-size: .93rem;
+}
+.howto li::before {
+  content: counter(step);
+  position: absolute;
+  left: 0;
+  top: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--orange);
+  color: #2a1400;
+  font-size: .72rem;
+  font-weight: 900;
+  display: grid;
+  place-items: center;
+}
+.fee-example { margin-top: 12px; font-size: .88rem; color: var(--muted); }
+.fee-example code {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 2px 8px;
+  color: var(--text);
+}
+
+.account-card {
+  margin-top: 14px;
+  padding: 20px;
+  border-radius: var(--radius);
+  border: 1px solid var(--orange);
+  background: var(--card);
+}
+.acct-owner { font-weight: 900; }
+.acct-line { color: var(--muted); font-size: .9rem; margin-top: 4px; }
+.acct-no {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--orange);
+  letter-spacing: .06em;
+  font-variant-numeric: tabular-nums;
+  margin: 6px 0 14px;
+}
+
+.fee-search { margin-top: 20px; }
+
+.fee-groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  align-items: start;
+  gap: 14px;
+  margin-top: 16px;
+}
+.fee-group {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  overflow-x: auto;
+}
+.fee-group-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+.fee-group-name { font-size: 1rem; font-weight: 900; }
+.fee-group-sum { font-weight: 900; color: var(--orange); font-variant-numeric: tabular-nums; }
+
+table.fee-table {
+  width: 100%;
+  min-width: 300px;
+  border-collapse: collapse;
+  font-size: .9rem;
+}
+table.fee-table th, table.fee-table td {
+  text-align: left;
+  padding: 9px 8px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+table.fee-table th { color: var(--muted); font-size: .76rem; letter-spacing: .06em; }
+table.fee-table td.num, table.fee-table th.num { text-align: right; }
+table.fee-table tbody tr:last-child td { border-bottom: 0; }
+.party { color: var(--muted); font-size: .85rem; }
+.fee-amt { font-weight: 900; font-variant-numeric: tabular-nums; }
+.fee-cell { white-space: nowrap; }
+tr.fee-bad { background: rgba(255, 107, 129, .1); }
+.fee-warn { display: block; color: var(--red); font-size: .75rem; font-weight: 700; }
+
+.fee-grand {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 16px;
+  margin-top: 18px;
+  padding: 18px 22px;
+  border-radius: var(--radius);
+  border: 1px solid var(--orange);
+  background: linear-gradient(160deg, rgba(255, 140, 43, .12), var(--card) 60%);
+}
+.grand-k { font-weight: 900; letter-spacing: .1em; }
+.grand-v {
+  font-size: clamp(1.8rem, 7vw, 2.6rem);
+  font-weight: 900;
+  color: var(--orange);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+.grand-x { color: var(--muted); font-size: .88rem; margin-left: auto; }
+
+.muted-cell { color: var(--muted); }
+
 /* ---------- 營位分佈圖 ---------- */
 .map-figure { margin: 24px 0 0; }
 .map-btn {

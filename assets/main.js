@@ -132,7 +132,9 @@
   const isUnconfirmed = (r) => r.adults == null || r.kids == null;
   const unconfirmed = CAMP.roster.filter(isUnconfirmed);
   const knownKids = CAMP.roster.reduce((t, r) => t + (r.kids || 0), 0);
-  const knownBabies = CAMP.roster.reduce((t, r) => t + (r.babies || 0), 0);
+  // 3 歲以下：3D 列印小物、小零件禮物要避開的對象
+  const knownBabies = CAMP.roster.reduce(
+    (t, r) => t + ((r.ages || []).filter((a) => a <= 3).length), 0);
 
   const gp = CAMP.giftPlan;
   if (gp && gp.show && CAMP.roster.length) {
@@ -156,9 +158,9 @@
       unconfirmed.forEach((r) => gapList.appendChild(el('li', null, r.site + '　' + r.contact)));
     }
 
-    if (!gp.includeBabies && knownBabies) {
+    if (knownBabies) {
       tp.appendChild(el('li', null,
-        '嫩嬰 ' + knownBabies + ' 位未計入備量 — 3 歲以下請避開有小零件的禮物（窒息風險）。'));
+        '有 ' + knownBabies + ' 位 3 歲以下的小小孩 — 請避開有小零件的禮物（窒息風險）。'));
     }
   }
 
@@ -172,6 +174,151 @@
     steps.appendChild(card);
   });
   $('#payment-note').textContent = CAMP.paymentNote;
+
+  /* ---------- 自助餐收費 ---------- */
+  const money = (n) => '$' + n.toLocaleString('en-US');
+
+  // 依收費標準重算：大人一律 adultPrice，小孩看年齡落在哪一段
+  function priceForAge(age) {
+    const tier = CAMP.fees.tiers.find((t) => age >= t.min);
+    return tier ? tier.price : 0;
+  }
+  function computeFee(r) {
+    if (r.adults == null || !r.ages) return null;
+    return r.adults * CAMP.fees.adultPrice + r.ages.reduce((t, a) => t + priceForAge(a), 0);
+  }
+  // 人數與年齡的顯示字串，例：2大2小（8Y、10Y）
+  function partyLabel(r) {
+    if (r.adults == null) return '—';
+    let s = r.adults + '大';
+    if (r.kids) s += r.kids + '小';
+    if (r.ages && r.ages.length) s += '（' + r.ages.map((a) => a + 'Y').join('、') + '）';
+    return s;
+  }
+
+  const fees = CAMP.fees;
+  if (fees && fees.show) {
+    $('#fees').hidden = false;
+    $('#fees-lead').textContent = fees.title + '，' + fees.deadline + '完成轉帳。';
+
+    const rulesUl = $('#fee-rules');
+    fees.rules.forEach((r) => {
+      const li = el('li');
+      li.appendChild(el('span', null, r.label));
+      li.appendChild(el('b', null, r.price ? money(r.price) : '免費'));
+      rulesUl.appendChild(li);
+    });
+
+    const howto = $('#fee-howto');
+    fees.howto.forEach((h) => howto.appendChild(el('li', null, h)));
+    $('#fee-example').textContent = fees.example;
+
+    if (fees.showAccounts) {
+      const wrap = $('#fee-accounts');
+      fees.accounts.forEach((a) => {
+        const card = el('div', 'account-card');
+        card.appendChild(el('div', 'acct-owner', a.owner));
+        card.appendChild(el('div', 'acct-line', a.method + '　' + a.code));
+        card.appendChild(el('div', 'acct-no', a.account));
+        if (a.url) {
+          const link = el('a', 'btn primary', '開啟轉帳連結');
+          link.href = a.url;
+          link.target = '_blank';
+          link.rel = 'noopener';
+          card.appendChild(link);
+        }
+        wrap.appendChild(card);
+      });
+    } else {
+      $('#fee-account-note').textContent = '⚠️ ' + fees.accountsHiddenNote;
+    }
+
+    // 依負責人分組
+    const ordered = CAMP.roster.filter((r) => r.ordered);
+    const groups = [];
+    ordered.forEach((r) => {
+      let g = groups.find((x) => x.name === r.group);
+      if (!g) groups.push((g = { name: r.group, rows: [] }));
+      g.rows.push(r);
+    });
+
+    let grand = 0;
+    let mismatches = 0;
+    const groupsWrap = $('#fee-groups');
+
+    groups.forEach((g) => {
+      const subtotal = g.rows.reduce((t, r) => t + r.fee, 0);
+      grand += subtotal;
+
+      const card = el('section', 'fee-group');
+      const head = el('div', 'fee-group-head');
+      head.appendChild(el('h3', 'fee-group-name', '負責人　' + g.name));
+      head.appendChild(el('span', 'fee-group-sum', money(subtotal)));
+      card.appendChild(head);
+
+      const table = el('table', 'fee-table');
+      const thead = el('thead');
+      const htr = el('tr');
+      ['營位', '訂購人', '人數與年齡', '費用'].forEach((t, i) => {
+        htr.appendChild(el('th', i === 3 ? 'num' : null, t));
+      });
+      thead.appendChild(htr);
+      table.appendChild(thead);
+
+      const tb = el('tbody');
+      g.rows.forEach((r) => {
+        const tr = el('tr');
+        tr.dataset.search = (r.site + ' ' + r.contact).toLowerCase();
+
+        const td1 = el('td');
+        td1.appendChild(el('span', 'site-badge', r.site));
+        tr.appendChild(td1);
+        tr.appendChild(el('td', null, r.contact));
+        tr.appendChild(el('td', 'party', partyLabel(r)));
+
+        const tdFee = el('td', 'num fee-cell');
+        tdFee.appendChild(el('span', 'fee-amt', money(r.fee)));
+        const calc = computeFee(r);
+        if (calc != null && calc !== r.fee) {
+          mismatches++;
+          tr.classList.add('fee-bad');
+          tdFee.appendChild(el('span', 'fee-warn', '規則算出 ' + money(calc)));
+        }
+        tr.appendChild(tdFee);
+        tb.appendChild(tr);
+      });
+      table.appendChild(tb);
+      card.appendChild(table);
+
+      groupsWrap.appendChild(card);
+    });
+
+    const notOrdered = CAMP.roster.filter((r) => !r.ordered);
+    const grandBox = $('#fee-grand');
+    grandBox.appendChild(el('span', 'grand-k', '總計'));
+    grandBox.appendChild(el('span', 'grand-v', money(grand)));
+    grandBox.appendChild(el('span', 'grand-x',
+      ordered.length + ' 個營位訂餐，' + notOrdered.length + ' 個未訂購'
+      + (mismatches ? '　·　⚠️ ' + mismatches + ' 筆金額與收費標準對不上' : '　·　金額全數與收費標準相符')));
+
+    const feeSearch = $('#fee-search');
+    const feeEmpty = $('#fee-empty');
+    feeSearch.addEventListener('input', () => {
+      const q = feeSearch.value.trim().toLowerCase();
+      let shown = 0;
+      groupsWrap.querySelectorAll('.fee-group').forEach((card) => {
+        let inCard = 0;
+        card.querySelectorAll('tbody tr').forEach((tr) => {
+          const hit = !q || tr.dataset.search.includes(q);
+          tr.hidden = !hit;
+          if (hit) inCard++;
+        });
+        card.hidden = inCard === 0;
+        shown += inCard;
+      });
+      feeEmpty.hidden = shown > 0;
+    });
+  }
 
   /* ---------- 營位分佈圖 ---------- */
   if (CAMP.map && CAMP.map.show) {
@@ -214,7 +361,7 @@
       ['營位', CAMP.roster.length + ' 個'],
       ['大人', sum('adults') + ' 人'],
       ['小孩', sum('kids') + ' 人'],
-      ['嫩嬰', sum('babies') + ' 人'],
+      ['訂自助餐', CAMP.roster.filter((r) => r.ordered).length + ' 戶'],
     ];
     chips.forEach(([k, v]) => {
       const c = el('span', 'chip');
@@ -243,9 +390,10 @@
       }
       tr.appendChild(tdContact);
 
-      ['adults', 'kids', 'babies'].forEach((k) => {
+      ['adults', 'kids'].forEach((k) => {
         tr.appendChild(el('td', 'num', r[k] == null ? '—' : String(r[k])));
       });
+      tr.appendChild(el('td', r.group ? null : 'muted-cell', r.group || '未訂餐'));
 
       tr.dataset.search = (r.site + ' ' + r.contact).toLowerCase();
       tbody.appendChild(tr);
@@ -253,20 +401,22 @@
 
     // 合計列：只加總「畫面上看得到」的列，所以搜尋 C 就會得到 C 區小計
     const totalLabel = $('#roster-total-label');
-    const totalCells = { adults: $('#total-adults'), kids: $('#total-kids'), babies: $('#total-babies') };
+    const totalCells = { adults: $('#total-adults'), kids: $('#total-kids') };
 
     function refreshTotals() {
       const rows = [...tbody.querySelectorAll('tr')].filter((tr) => !tr.hidden);
       let gaps = 0;
-      const t = { adults: 0, kids: 0, babies: 0 };
+      let paying = 0;
+      const t = { adults: 0, kids: 0 };
       rows.forEach((tr) => {
         const r = CAMP.roster[Number(tr.dataset.idx)];
         t.adults += r.adults || 0;
         t.kids += r.kids || 0;
-        t.babies += r.babies || 0;
+        if (r.ordered) paying++;
         if (isUnconfirmed(r)) gaps++;
       });
       Object.keys(totalCells).forEach((k) => { totalCells[k].textContent = t[k]; });
+      $('#total-group').textContent = paying + ' 戶訂餐';
       const all = rows.length === CAMP.roster.length;
       totalLabel.textContent = '合計　' + (all ? '' : '（篩選後）') + rows.length + ' 個營位'
         + (gaps ? '　·　其中 ' + gaps + ' 個未填人數' : '');

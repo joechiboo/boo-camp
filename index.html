@@ -27,7 +27,8 @@
     <a href="#schedule">行程</a>
     <a href="#meals">餐食</a>
     <a href="#treat">討糖</a>
-    <a href="#steps">報名繳費</a>
+    <a href="#steps">流程</a>
+    <a href="#fees">收費</a>
     <a href="#map">營位圖</a>
     <a href="#roster">營位表</a>
     <a href="#packing">打包</a>
@@ -133,7 +134,37 @@
     <p class="warn" id="payment-note"></p>
   </section>
 
-  <section class="section alt" id="map" hidden>
+  <section class="section alt" id="fees" hidden>
+    <h2 class="sec-title">💰 自助餐收費</h2>
+    <p class="sec-lead" id="fees-lead"></p>
+
+    <div class="fee-top">
+      <div class="fee-rules">
+        <h3 class="fee-h">收費標準</h3>
+        <ul class="rule-list" id="fee-rules"></ul>
+      </div>
+      <div class="fee-howto">
+        <h3 class="fee-h">怎麼繳</h3>
+        <ol class="howto" id="fee-howto"></ol>
+        <p class="fee-example">留言範例：<code id="fee-example"></code></p>
+      </div>
+    </div>
+
+    <div id="fee-accounts"></div>
+    <p class="warn" id="fee-account-note"></p>
+
+    <label class="search fee-search">
+      <span class="sr-only">搜尋你的營位或名字</span>
+      <input type="search" id="fee-search" placeholder="搜尋你的營位或名字，例如 C3、Melinda">
+    </label>
+
+    <div class="fee-groups" id="fee-groups"></div>
+    <p class="empty" id="fee-empty" hidden>找不到符合的營位。</p>
+
+    <div class="fee-grand" id="fee-grand"></div>
+  </section>
+
+  <section class="section" id="map" hidden>
     <h2 class="sec-title">🗺️ 營位分佈圖</h2>
     <figure class="map-figure">
       <button class="map-btn" id="map-open" type="button">
@@ -145,7 +176,7 @@
     <ul class="facilities" id="facilities"></ul>
   </section>
 
-  <section class="section" id="roster" hidden>
+  <section class="section alt" id="roster" hidden>
     <h2 class="sec-title">⛺ 營位表</h2>
     <div class="roster-summary" id="roster-summary"></div>
     <div class="roster-tools">
@@ -164,7 +195,7 @@
             <th data-key="contact" aria-sort="none"><button type="button" class="th-btn">聯絡人<span class="arrow"></span></button></th>
             <th data-key="adults"  aria-sort="none" class="num"><button type="button" class="th-btn">大人<span class="arrow"></span></button></th>
             <th data-key="kids"    aria-sort="none" class="num"><button type="button" class="th-btn">小孩<span class="arrow"></span></button></th>
-            <th data-key="babies"  aria-sort="none" class="num"><button type="button" class="th-btn">嫩嬰<span class="arrow"></span></button></th>
+            <th data-key="group"   aria-sort="none"><button type="button" class="th-btn">收費負責人<span class="arrow"></span></button></th>
           </tr>
         </thead>
         <tbody id="roster-body"></tbody>
@@ -173,7 +204,7 @@
             <th colspan="3" id="roster-total-label">合計</th>
             <td class="num" id="total-adults">0</td>
             <td class="num" id="total-kids">0</td>
-            <td class="num" id="total-babies">0</td>
+            <td id="total-group"></td>
           </tr>
         </tfoot>
       </table>

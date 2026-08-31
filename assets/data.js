@@ -44,16 +44,56 @@ const CAMP = {
       desc: '未達廠商 $20,000 低銷，已於 2025/11/22 確定取消，第一夜晚餐請自理。',
     },
     {
-      state: 'active',
+      state: 'done',
       title: '第二夜 Buffet 自助餐登記',
-      desc: '請在 LINE 記事本登記大人／小孩人數，7 歲以下免費仍要標註數量，廠商才知道要備多少份。',
+      desc: '各家庭人數與年齡已統計完成，共 32 個營位訂餐。',
+    },
+    {
+      state: 'active',
+      title: '自助餐收費中 — 9/4（五）前',
+      desc: '請對照下方收費表確認自己的金額，轉帳給你的負責人，並在該負責人的 LINE 記事本留言對帳。',
     },
     {
       state: 'todo',
-      title: '收費（自助餐、夜衝、租帳）',
-      desc: '10 月統一收費，金額與轉帳資訊由主辦在 LINE 群組公告。',
+      title: '夜衝與租帳登記收費',
+      desc: '自助餐收完後另行處理，金額與方式由主辦在 LINE 群組公告。',
     },
   ],
+
+  /* ---------- 自助餐收費 ----------
+     費用會用 feeRules 從「大人數 + 每個小孩的年齡」重算一次，
+     跟 roster 裡填的 fee 對不起來時，畫面上那筆會標紅提醒。 */
+  fees: {
+    show: true,
+    title: '中式自助晚餐（第二夜）',
+    deadline: '9/4（五）前',
+    rules: [
+      { label: '13 歲以上', price: 380 },
+      { label: '8–12 歲', price: 200 },
+      { label: '7 歲以下', price: 0 },
+    ],
+    // 依上面的規則計算：大人一律 380，小孩看年齡
+    adultPrice: 380,
+    tiers: [{ min: 13, price: 380 }, { min: 8, price: 200 }, { min: 0, price: 0 }],
+    howto: [
+      '對照下方表格確認自己的金額是否正確',
+      '9/4（五）前轉帳給你那一組的負責人',
+      '轉完帳請到該負責人的 LINE 記事本留言，方便對帳',
+    ],
+    example: 'C3　1大1小(9y)　580',
+    // 轉帳帳號預設不放在公開網頁上（見 README）。要顯示改成 true。
+    showAccounts: false,
+    accountsHiddenNote: '轉帳帳號請看 LINE 群組公告或私訊負責人。網站不放帳號，收到任何要你轉到其他帳戶的訊息，請先向主辦確認。',
+    accounts: [
+      {
+        owner: 'Lydia（陳玉雯）',
+        method: '街口支付',
+        code: '機構代碼 396',
+        account: '901161550',
+        url: 'https://service.jkopay.com/r/transfer?j=Transfer:901161550',
+      },
+    ],
+  },
 
   /* ---------- 行程 ---------- */
   schedule: [
@@ -231,53 +271,61 @@ const CAMP = {
      刻意不放小孩的年齡與性別（公開網頁上的孩童個資考量）。
      type: 'tent' 帳篷／車露 · 'cabin' 小木屋 */
   showRoster: true, // 改成 false 可整個隱藏營位表區塊
-  rosterNote: '本表已納入最新異動（蘭屋⇄彩菊換房、星星、太陽），比頁面上那張營位圖新。標「—」的是還沒填人數的營位，請主辦補齊；有誤請在 LINE 群組 tag 主辦。',
+  rosterNote: '人數與年齡以「各組名單與費用總計」為準，比頁面上那張營位圖新。標「—」的是沒訂自助餐、資料也還沒補齊的營位。有誤請在 LINE 群組 tag 你的負責人。',
+
+  /* 欄位說明：
+     group   收費負責人（嘉芸／淳瑜／Tanya／Lydia），沒訂餐的填 null
+     adults  大人數
+     kids    小孩數
+     ages    每個小孩的年齡（陣列）。有填才會驗算費用；長度要等於 kids
+     fee     收費表上的金額，會跟 feeRules 重算的結果比對
+     ordered 是否有訂第二夜自助餐 */
   roster: [
-    // 小木屋
-    { site: '星星', type: 'cabin', contact: '家禾',      adults: null, kids: null, babies: 0 },
-    { site: '新屋', type: 'cabin', contact: 'Elaine',    adults: 2, kids: 2, babies: 0, note: '新版圖標示為「太陽」，名稱待確認' },
-    { site: '菊屋', type: 'cabin', contact: 'Jan',       adults: 2, kids: 2, babies: 0 },
-    { site: '竹屋', type: 'cabin', contact: 'Melinda',   adults: 2, kids: 2, babies: 0 },
-    { site: '蘭屋', type: 'cabin', contact: 'Jill',      adults: 2, kids: 2, babies: 0, note: '與彩菊換房' },
-    { site: '梅屋', type: 'cabin', contact: '蕭宇鈞',    adults: 2, kids: 1, babies: 0 },
-    { site: '瑞兔', type: 'cabin', contact: '綺砡',      adults: 2, kids: 2, babies: 0 },
-    { site: '祥兔', type: 'cabin', contact: '靜怡',      adults: null, kids: null, babies: 0 },
-    { site: '彩菊', type: 'cabin', contact: 'Rita',      adults: 2, kids: 3, babies: 0, note: '與蘭屋換房' },
-    { site: '金菊', type: 'cabin', contact: 'Angel',     adults: null, kids: null, babies: 0, note: '共 3 人' },
-    // A 區
-    { site: 'A1', type: 'tent', contact: '真真車露',     adults: 2, kids: 1, babies: 0 },
-    { site: 'A2', type: 'tent', contact: '筳歡車露',     adults: 2, kids: 2, babies: 0 },
-    { site: 'A3', type: 'tent', contact: 'Joana',        adults: 2, kids: 2, babies: 0 },
-    { site: 'A4', type: 'tent', contact: '小育',         adults: 2, kids: 1, babies: 0 },
-    { site: 'A5', type: 'tent', contact: 'sandy',        adults: 2, kids: 2, babies: 0 },
-    { site: 'A6', type: 'tent', contact: '玉佩',         adults: 2, kids: 2, babies: 0 },
-    // B 區
-    { site: 'B1', type: 'tent', contact: '鳥ㄚㄚ',       adults: 2, kids: 2, babies: 0 },
-    { site: 'B2', type: 'tent', contact: '小莉',         adults: 2, kids: 2, babies: 0 },
-    { site: 'B3', type: 'tent', contact: '淳瑜',         adults: 2, kids: 1, babies: 0 },
-    { site: 'B4', type: 'tent', contact: 'Genie Hung',   adults: 2, kids: 1, babies: 0 },
-    { site: 'B5', type: 'tent', contact: '小妞',         adults: 2, kids: 1, babies: 1 },
-    { site: 'B6', type: 'tent', contact: '栗子',         adults: 2, kids: 1, babies: 0 },
-    // C 區
-    { site: 'C1', type: 'tent', contact: 'Anita',        adults: 3, kids: 1, babies: 0 },
-    { site: 'C2', type: 'tent', contact: 'yoyo',         adults: 2, kids: 1, babies: 1 },
-    { site: 'C3', type: 'tent', contact: 'Trini',        adults: 1, kids: 1, babies: 0 },
-    { site: 'C4', type: 'tent', contact: 'Lydia',        adults: 2, kids: 1, babies: 1, host: true },
-    { site: 'C5', type: 'tent', contact: 'Yello',        adults: null, kids: null, babies: 0, note: '共 2 人' },
-    { site: 'C6', type: 'tent', contact: 'Eric',         adults: null, kids: null, babies: 0 },
-    // D 區
-    { site: 'D1', type: 'tent', contact: 'Doris',        adults: 2, kids: 1, babies: 0 },
-    { site: 'D2', type: 'tent', contact: 'Doris',        adults: null, kids: null, babies: 0 },
-    { site: 'D3', type: 'tent', contact: '靜怡',         adults: null, kids: null, babies: 0, note: '共 3 人' },
-    { site: 'D4', type: 'tent', contact: '靜怡',         adults: 2, kids: 1, babies: 0 },
-    { site: 'D5', type: 'tent', contact: 'Darren',       adults: 2, kids: 1, babies: 0 },
-    { site: 'D6', type: 'tent', contact: 'Darren',       adults: null, kids: null, babies: 0 },
-    // E 區
-    { site: 'E1', type: 'tent', contact: 'Tanya',        adults: null, kids: null, babies: 0, note: '共 2 人' },
-    { site: 'E2', type: 'tent', contact: 'Phoebe',       adults: 2, kids: 1, babies: 0 },
-    { site: 'E3', type: 'tent', contact: 'Eva',          adults: null, kids: null, babies: 0, note: '共 2 人' },
-    { site: 'E4', type: 'tent', contact: '依依',         adults: null, kids: null, babies: 0, note: '共 2 人' },
-    { site: 'E5', type: 'tent', contact: '裴裴',         adults: null, kids: null, babies: 0, note: '共 2 人' },
-    { site: 'E6', type: 'tent', contact: 'Ginny',        adults: 2, kids: 2, babies: 0 },
+    // ── 小木屋 ──
+    { site: '星星', type: 'cabin', contact: '家禾',        group: null,    adults: null, kids: null, ages: null,       fee: null, ordered: false, note: '收費表上沒有這一戶，待主辦確認' },
+    { site: '太陽', type: 'cabin', contact: 'Elaine',      group: '嘉芸',  adults: 2, kids: 2, ages: [8, 10],          fee: 1160, ordered: true,  note: '舊營位圖上標示為「新屋」' },
+    { site: '菊屋', type: 'cabin', contact: 'Vito',        group: '嘉芸',  adults: 2, kids: 2, ages: [11, 11],         fee: 1160, ordered: true,  note: '營位圖上的聯絡人是 Jan' },
+    { site: '竹屋', type: 'cabin', contact: 'Melinda',     group: '嘉芸',  adults: 2, kids: 2, ages: [11, 8],          fee: 1160, ordered: true },
+    { site: '蘭屋', type: 'cabin', contact: 'Jill Liao',   group: 'Tanya', adults: 3, kids: 1, ages: null,             fee: 1340, ordered: true,  note: '與彩菊換房；收費表上的營位還是換房前的' },
+    { site: '梅屋', type: 'cabin', contact: '玉佩',        group: '淳瑜',  adults: 2, kids: 1, ages: [4],              fee: 760,  ordered: true,  note: '營位圖上的聯絡人是蕭宇鈞' },
+    { site: '瑞兔', type: 'cabin', contact: '綺亞',        group: '淳瑜',  adults: 2, kids: 2, ages: [9, 10],          fee: 1160, ordered: true },
+    { site: '祥兔', type: 'cabin', contact: '靜怡',        group: null,    adults: null, kids: null, ages: null,       fee: null, ordered: false },
+    { site: '彩菊', type: 'cabin', contact: 'Rita',        group: '嘉芸',  adults: 2, kids: 3, ages: [13, 11, 9],      fee: 1540, ordered: true,  note: '與蘭屋換房；收費表上的營位還是換房前的' },
+    { site: '金菊', type: 'cabin', contact: 'Angel',       group: '淳瑜',  adults: 2, kids: 3, ages: [9, 6, 6],        fee: 960,  ordered: true },
+    // ── A 區 ──
+    { site: 'A1', type: 'tent', contact: '真真',           group: '淳瑜',  adults: 2, kids: 1, ages: [9],              fee: 960,  ordered: true },
+    { site: 'A2', type: 'tent', contact: '庭歡',           group: '淳瑜',  adults: 2, kids: 2, ages: [11, 9],          fee: 1160, ordered: true },
+    { site: 'A3', type: 'tent', contact: 'Joana',          group: '淳瑜',  adults: 2, kids: 2, ages: [9, 6],           fee: 960,  ordered: true },
+    { site: 'A4', type: 'tent', contact: '林小宥',         group: '淳瑜',  adults: 2, kids: 1, ages: [9],              fee: 960,  ordered: true },
+    { site: 'A5', type: 'tent', contact: 'Sandy',          group: '淳瑜',  adults: 2, kids: 2, ages: [9, 7],           fee: 960,  ordered: true },
+    { site: 'A6', type: 'tent', contact: '玉佩',           group: '淳瑜',  adults: 2, kids: 2, ages: [15, 8],          fee: 1340, ordered: true,  note: '收費表寫 3大1小 — 15Y 依規則以大人計費' },
+    // ── B 區 ──
+    { site: 'B1', type: 'tent', contact: '鳥ㄚㄚ',         group: null,    adults: 2, kids: 2, ages: null,             fee: null, ordered: false },
+    { site: 'B2', type: 'tent', contact: '宜穎(小莉)',     group: 'Tanya', adults: 2, kids: 2, ages: [10, 5],          fee: 960,  ordered: true },
+    { site: 'B3', type: 'tent', contact: '淳瑜',           group: '淳瑜',  adults: 2, kids: 1, ages: [9],              fee: 960,  ordered: true },
+    { site: 'B4', type: 'tent', contact: 'Genie Hung',     group: '淳瑜',  adults: 2, kids: 1, ages: [9],              fee: 960,  ordered: true },
+    { site: 'B5', type: 'tent', contact: '小妞',           group: '淳瑜',  adults: 2, kids: 2, ages: [10, 5],          fee: 960,  ordered: true },
+    { site: 'B6', type: 'tent', contact: '燕',             group: '淳瑜',  adults: 2, kids: 1, ages: [11],             fee: 960,  ordered: true,  note: '營位圖上的聯絡人是栗子' },
+    // ── C 區 ──
+    { site: 'C1', type: 'tent', contact: 'anita-平安',     group: '嘉芸',  adults: 2, kids: 0, ages: [],               fee: 760,  ordered: true,  note: '營位圖上是 3大1小' },
+    { site: 'C2', type: 'tent', contact: 'yoyo Liu',       group: '嘉芸',  adults: 2, kids: 2, ages: [10, 3],          fee: 960,  ordered: true },
+    { site: 'C3', type: 'tent', contact: '江嘉芸',         group: '嘉芸',  adults: 1, kids: 1, ages: [9],              fee: 580,  ordered: true,  note: '營位圖上的聯絡人是 Trini' },
+    { site: 'C4', type: 'tent', contact: '紀伯喬',         group: 'Lydia', adults: 2, kids: 2, ages: [8, 5],           fee: 960,  ordered: true,  note: '營位圖上這格是 Lydia' },
+    { site: 'C5', type: 'tent', contact: 'Lydia 陳玉雯',   group: 'Lydia', adults: 2, kids: 2, ages: [11, 6],          fee: 960,  ordered: true,  host: true, note: '收費表寫 2大1小，但列了兩個年齡；金額是以 2大2小 計算' },
+    { site: 'C6', type: 'tent', contact: 'Eric Yang',      group: 'Lydia', adults: 2, kids: 2, ages: [9, 6],           fee: 960,  ordered: true },
+    // ── D 區 ──
+    { site: 'D1', type: 'tent', contact: 'Doris Lu呂珮琳', group: 'Lydia', adults: 2, kids: 1, ages: [6],              fee: 760,  ordered: true },
+    { site: 'D2', type: 'tent', contact: 'Candice 姿方',   group: 'Lydia', adults: 2, kids: 1, ages: [6],              fee: 760,  ordered: true },
+    { site: 'D3', type: 'tent', contact: '靜怡',           group: null,    adults: null, kids: null, ages: null,       fee: null, ordered: false, note: '共 3 人' },
+    { site: 'D4', type: 'tent', contact: '靜怡',           group: 'Lydia', adults: 2, kids: 2, ages: [8, 10],          fee: 1160, ordered: true },
+    { site: 'D5', type: 'tent', contact: 'zizi婆婆',       group: 'Lydia', adults: 2, kids: 1, ages: [6],              fee: 760,  ordered: true,  note: '營位圖上的聯絡人是 Darren' },
+    { site: 'D6', type: 'tent', contact: 'Mini',           group: 'Lydia', adults: 2, kids: 1, ages: [5],              fee: 760,  ordered: true,  note: '營位圖上的聯絡人是 Darren' },
+    // ── E 區 ──
+    { site: 'E1', type: 'tent', contact: 'TANYA',          group: 'Tanya', adults: 2, kids: 2, ages: [9, 7],           fee: 960,  ordered: true },
+    { site: 'E2', type: 'tent', contact: 'Phoebe',         group: null,    adults: 2, kids: 1, ages: null,             fee: null, ordered: false },
+    { site: 'E3', type: 'tent', contact: 'Eva',            group: null,    adults: null, kids: null, ages: null,       fee: null, ordered: false, note: '共 2 人' },
+    { site: 'E4', type: 'tent', contact: '依依',           group: 'Tanya', adults: 2, kids: 2, ages: [8, 10],          fee: 1160, ordered: true },
+    { site: 'E5', type: 'tent', contact: '裴裴',           group: null,    adults: null, kids: null, ages: null,       fee: null, ordered: false, note: '共 2 人' },
+    { site: 'E6', type: 'tent', contact: 'Ginny',          group: null,    adults: 2, kids: 2, ages: null,             fee: null, ordered: false },
   ],
 };
