@@ -218,6 +218,8 @@ const CAMP = {
     src: 'assets/camp-map.jpg',
     alt: '營區空拍圖，標示各營位編號、聯絡人與家庭人數，以及入口、營本部、浴廁、沙坑、溜滑梯、動物區、生態池的位置',
     caption: '點圖片可放大。營位編號、營本部、浴廁、沙坑、溜滑梯、動物區、生態池位置都標在上面了。',
+    // 圖還沒換新版時填這行，畫面會顯示提醒；換上新圖後把字串清成 '' 即可
+    stale: '這張圖是舊版：蘭屋⇄彩菊換房、星星與太陽都還沒反映在圖上。營位與人數請以下方營位表為準。',
   },
 
   // 營區設施（顯示在地圖下方）
@@ -229,17 +231,18 @@ const CAMP = {
      刻意不放小孩的年齡與性別（公開網頁上的孩童個資考量）。
      type: 'tent' 帳篷／車露 · 'cabin' 小木屋 */
   showRoster: true, // 改成 false 可整個隱藏營位表區塊
-  rosterNote: '資料來源為營位分佈圖。標「—」的是圖上未填人數的營位，請主辦補齊；有誤請在 LINE 群組 tag 主辦。',
+  rosterNote: '本表已納入最新異動（蘭屋⇄彩菊換房、星星、太陽），比頁面上那張營位圖新。標「—」的是還沒填人數的營位，請主辦補齊；有誤請在 LINE 群組 tag 主辦。',
   roster: [
     // 小木屋
-    { site: '新屋', type: 'cabin', contact: '靜怡',      adults: null, kids: null, babies: 0 },
+    { site: '星星', type: 'cabin', contact: '家禾',      adults: null, kids: null, babies: 0 },
+    { site: '新屋', type: 'cabin', contact: 'Elaine',    adults: 2, kids: 2, babies: 0, note: '新版圖標示為「太陽」，名稱待確認' },
     { site: '菊屋', type: 'cabin', contact: 'Jan',       adults: 2, kids: 2, babies: 0 },
     { site: '竹屋', type: 'cabin', contact: 'Melinda',   adults: 2, kids: 2, babies: 0 },
-    { site: '蘭屋', type: 'cabin', contact: 'Rita',      adults: 2, kids: 3, babies: 0 },
+    { site: '蘭屋', type: 'cabin', contact: 'Jill',      adults: 2, kids: 2, babies: 0, note: '與彩菊換房' },
     { site: '梅屋', type: 'cabin', contact: '蕭宇鈞',    adults: 2, kids: 1, babies: 0 },
     { site: '瑞兔', type: 'cabin', contact: '綺砡',      adults: 2, kids: 2, babies: 0 },
     { site: '祥兔', type: 'cabin', contact: '靜怡',      adults: null, kids: null, babies: 0 },
-    { site: '彩菊', type: 'cabin', contact: 'Jill',      adults: null, kids: null, babies: 0, note: '共 4 人' },
+    { site: '彩菊', type: 'cabin', contact: 'Rita',      adults: 2, kids: 3, babies: 0, note: '與蘭屋換房' },
     { site: '金菊', type: 'cabin', contact: 'Angel',     adults: null, kids: null, babies: 0, note: '共 3 人' },
     // A 區
     { site: 'A1', type: 'tent', contact: '真真車露',     adults: 2, kids: 1, babies: 0 },

@@ -181,6 +181,12 @@
     img.alt = CAMP.map.alt;
     $('#map-caption').textContent = CAMP.map.caption;
 
+    if (CAMP.map.stale) {
+      const s = $('#map-stale');
+      s.textContent = '⚠️ ' + CAMP.map.stale;
+      s.hidden = false;
+    }
+
     const fac = $('#facilities');
     (CAMP.facilities || []).forEach((f) => fac.appendChild(el('li', null, f)));
 
